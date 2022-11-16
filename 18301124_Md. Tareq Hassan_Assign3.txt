@@ -1,0 +1,134 @@
+import random
+
+def minimax(pos, depth, t_f):
+    global bComparisons
+
+    if depth == 0:
+        return minimax_tree[pos]
+    
+    child = pos + (pos*2)
+
+    if t_f:
+        maximum_value = float("-inf")
+        for n in range(1, branch+1, 1):
+            bComparisons += 1 
+            eval = minimax(child + n, depth-1, False)
+
+            if maximum_value > eval:
+                maximum_value = maximum_value
+            else:
+                maximum_value = eval
+
+            minimax_tree[pos] = maximum_value
+        return maximum_value
+
+    else:
+        minimum_value = float("inf")
+        for n in range(1, branch+1, 1):
+            bComparisons+= 1 
+            eval = minimax(child + n, depth-1, True)
+
+            if minimum_value < eval:
+                minimum_value = minimum_value
+            else:
+                minimum_value = eval
+            
+            minimax_tree[pos] = minimum_value
+        return minimum_value
+
+
+def abpruning(pos, depth, alpha, beta, t_f):
+    global aComparisons
+
+    if depth == 0:
+        return abPruning_tree[pos]
+    
+    child = pos + (pos*2)
+
+    if t_f:
+        maximum_value = float("-inf")
+        for n in range(1, branch+1, 1):
+            aComparisons += 1 
+            eval = abpruning(child + n, depth-1, alpha, beta, False)
+
+            if maximum_value > eval:
+                maximum_value = maximum_value 
+            else:
+                maximum_value = eval
+
+            abPruning_tree[pos] = maximum_value
+
+            if alpha > eval:
+                alpha = alpha
+            else:
+                alpha = eval
+
+            if beta <= alpha:
+                aComparisons -= 1
+                break
+
+        return maximum_value
+
+    else:
+        minimum_value = float("inf")
+        for n in range(1, branch+1, 1):
+            aComparisons+= 1 
+            eval = abpruning(child + n, depth-1, alpha, beta, True)
+
+            if minimum_value < eval:
+                minimum_value = minimum_value
+            else:
+                minimum_value = eval
+            
+            abPruning_tree[pos] = minimum_value
+
+            if beta < eval:
+                beta = beta
+            else:
+                beta = eval
+
+            if beta <= alpha:
+                aComparisons -= 1
+                break
+            
+        return minimum_value
+
+
+turns = int(input("Number of turns "))
+notes = int(input("Branches "))
+min = int(input("min "))
+max = int(input("max "))
+
+depth = 2*turns
+branch = notes
+terminal_state = branch ** depth
+
+bComparisons = 0
+aComparisons = 0
+
+total_nodes = 1
+
+for n in range(1, branch, 1):
+    total_nodes += branch**n
+
+tree = [None] * total_nodes
+
+for n in range(total_nodes-1, total_nodes-1-terminal_state, -1):
+    tree[n] = random.randint(min, max)
+
+minimax_tree = []
+abPruning_tree = []
+for n in tree:
+    minimax_tree.append(n)
+    abPruning_tree.append(n)
+
+
+minimax(0, depth, True)
+abpruning(0, depth, float("-inf"), float("inf"), True)
+
+print("Depth: ", depth)
+print("Branch :", branch)
+print("Terminal State(Leaf Nodes): ", terminal_state)
+print("Maximum amount: ", minimax_tree[0])
+print("comparisons : ", bComparisons)
+print("comparisons : ", aComparisons)

@@ -1,0 +1,46 @@
+import pandas as pd
+import numpy as np
+import sklearn
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+
+HD_Data = pd.read_csv("/content/heart disease classification dataset.csv")
+
+print(HD_Data.shape)#Shape before droping anyting from database
+print(HD_Data.head(3))
+HD_Data.drop(HD_Data.columns[HD_Data.columns.str.contains('Unnamed',case = False)],axis = 1, inplace = True)
+print(HD_Data.shape)#Shape after droping column
+
+print(HD_Data.isnull().sum()) #To view among all columns which of the columns contains null value
+print("Number of rows with null values in trestbps :", HD_Data['trestbps'].isnull().sum())
+print("Number of rows with null values in chol :", HD_Data['chol'].isnull().sum())
+print("Number of rows with null values in thalach :", HD_Data['thalach'].isnull().sum())
+print("Shape of dataframe before dropping:", HD_Data.shape)
+HD_Data = HD_Data.dropna(axis = 0, subset = ['trestbps', 'chol', 'thalach'])#Droping null value row from column 
+print("Shape after dropping:", HD_Data.shape)
+
+
+HD_Data['sex'] = HD_Data['sex'].map({'male':1, 'female':2})#Maping categorical feature (Male=1, Female=2)
+HD_Data['target'] = HD_Data['target'].map({'yes':1, 'no':0})#Maping categorical feature (Yes=1, No=0)
+print(HD_Data[['sex', 'target']])#Printing after encoding categorical feature
+X = HD_Data[['age','sex','cp','trestbps','chol','fbs','restecg','thalach','exang','oldpeak','slope','ca','thal']]
+Y = HD_Data[['target']]
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=0)#Spliting data into train and test set
+print(X_train.shape)
+print(X_test.shape)
+print(Y_train.shape)
+print(Y_test.shape)
+
+knn=KNeighborsClassifier()
+knn.fit(X_train, Y_train)
+print("Test set accuracy: {:.2f}".format(knn.score(X_test, Y_test)))
+
+#Scalling useing MinMaxScaler
+scaler = MinMaxScaler()
+scaler.fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+knn.fit(X_train_scaled, Y_train)
+print("Scaled test set accuracy: {:.2f}".format(knn.score(X_test_scaled, Y_test)))# scoring on the scaled test set
